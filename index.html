@@ -4,9 +4,851 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProjectBlock - Enterprise Innovation Platform</title>
-    <!-- Copy the complete HTML from our artifact -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 0 40px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        }
+
+        h1 {
+            font-size: 3.5em;
+            color: white;
+            margin-bottom: 12px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+        }
+
+        .primary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .primary-btn:hover::before {
+            left: 100%;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+        }
+
+        .filter-btn.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .idea-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+        }
+
+        .idea-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .idea-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+        }
+
+        .idea-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .idea-title {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .idea-category {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .idea-description {
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            font-size: 1.05em;
+        }
+
+        .idea-readme {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            max-height: 220px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .idea-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .idea-meta {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+
+        .idea-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8em;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.3s ease;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .close-btn:hover {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 1.05em;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 140px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.5;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .empty-state h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pricing-tier {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pricing-tier h4 {
+            color: #3b82f6;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .pricing-tier ul {
+            color: rgba(255, 255, 255, 0.8);
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pricing-tier li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .pricing-tier li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .ideas-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Copy the complete body content from our artifact -->
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">PB</div>
+                <h1>ProjectBlock</h1>
+            </div>
+            <p class="subtitle">Enterprise Innovation Platform - Build the Future, Block by Block</p>
+            
+            <div class="stats-bar">
+                <div class="stat">
+                    <div class="stat-number" id="totalIdeas">0</div>
+                    <div class="stat-label">Innovation Projects</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="totalCategories">5</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$2.35B</div>
+                    <div class="stat-label">Market Opportunity</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button class="primary-btn" onclick="openModal()">
+                ➕ Add Innovation Project
+            </button>
+            <button class="filter-btn active" data-filter="all">All Projects</button>
+            <button class="filter-btn" data-filter="ai">AI & ML</button>
+            <button class="filter-btn" data-filter="fintech">FinTech</button>
+            <button class="filter-btn" data-filter="healthcare">HealthTech</button>
+            <button class="filter-btn" data-filter="enterprise">Enterprise</button>
+            <button class="filter-btn" data-filter="other">Other</button>
+        </div>
+
+        <div class="ideas-grid" id="ideasGrid">
+            <div class="empty-state">
+                <h3>🚀 Ready to Scale Innovation?</h3>
+                <p>Start building your enterprise innovation portfolio with our proven framework</p>
+                <button class="cta-button" onclick="openModal()">
+                    <span>Create First Project</span>
+                    <span>→</span>
+                </button>
+                
+                <div class="pricing-tier">
+                    <h4>🎯 Target Market: Fortune 500 & Scale-ups</h4>
+                    <ul>
+                        <li>Healthcare & Technology sectors (38% VC investment growth)</li>
+                        <li>North American focus for premium pricing ($50-399 MRR)</li>
+                        <li>Enterprise partnerships ($100K+ annual contracts)</li>
+                        <li>Innovation consulting services ($150-500/hour)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing ideas -->
+    <div class="modal" id="ideaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add Innovation Project</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="ideaForm">
+                <div class="form-group">
+                    <label for="ideaTitle">Project Title</label>
+                    <input type="text" id="ideaTitle" required placeholder="e.g., AI-Powered Customer Analytics Platform">
+                </div>
+                <div class="form-group">
+                    <label for="ideaCategory">Category</label>
+                    <select id="ideaCategory" required>
+                        <option value="">Select category</option>
+                        <option value="ai">AI & Machine Learning</option>
+                        <option value="fintech">FinTech & Payments</option>
+                        <option value="healthcare">HealthTech & MedTech</option>
+                        <option value="enterprise">Enterprise Software</option>
+                        <option value="other">Other Innovation</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ideaDescription">Executive Summary</label>
+                    <input type="text" id="ideaDescription" required placeholder="One-line value proposition for C-level executives">
+                </div>
+                <div class="form-group">
+                    <label for="ideaReadme">Detailed Project Documentation</label>
+                    <textarea id="ideaReadme" required placeholder="# Project Overview
+
+## Market Opportunity
+- Total Addressable Market (TAM)
+- Target customer segments
+- Competitive landscape
+
+## Technical Implementation
+- Core technology stack
+- Development roadmap
+- Resource requirements
+
+## Business Model
+- Revenue streams
+- Pricing strategy
+- Go-to-market approach
+
+## Risk Assessment
+- Technical risks
+- Market risks
+- Mitigation strategies
+
+## Success Metrics
+- KPIs and milestones
+- ROI projections
+- Timeline"></textarea>
+                </div>
+                <button type="submit" class="save-btn">💾 Save Innovation Project</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let ideas = JSON.parse(localStorage.getItem('projectBlockInnovations')) || [];
+        let currentFilter = 'all';
+        let editingIndex = -1;
+
+        // Load example project if no projects exist
+        if (ideas.length === 0) {
+            ideas = [
+                {
+                    id: Date.now(),
+                    title: "Modular Innovation Framework Platform",
+                    category: "ai",
+                    description: "Enterprise platform using modular 'building blocks' to accelerate innovation project development and deployment",
+                    readme: `# Modular Innovation Framework Platform
+
+## Market Opportunity
+- **TAM**: $2.35B innovation management software market (16.4% CAGR)
+- **Target**: Fortune 500 companies with $782B annual R&D spend
+- **Competitive Edge**: Modular building-block approach vs monolithic platforms
+
+## Technical Implementation
+- **Core Stack**: Microservices architecture, React, GraphQL, PostgreSQL, AWS
+- **Modular Design**: Pre-built innovation "blocks" - ideation, validation, prototyping, scaling
+- **Integration**: Drag-and-drop interface for custom innovation workflows
+- **Security**: Zero-trust architecture, SOC 2 Type II compliance
+
+## Business Model
+- **Freemium SaaS**: $59-399/month based on active project blocks
+- **Enterprise**: $100K+ annual contracts with custom block development
+- **Revenue Streams**: Subscriptions (65%), custom blocks (25%), consulting (10%)
+
+## Competitive Advantage
+- **Block-based Architecture**: Faster time-to-value vs traditional platforms
+- **Marketplace**: Third-party innovation blocks ecosystem
+- **AI-Powered**: Smart block recommendations based on project context
+
+## Risk Assessment
+- **Technical**: Complex microservices coordination, block compatibility
+- **Market**: Adoption barriers for established innovation processes
+- **Mitigation**: Pilot programs, seamless migration tools, ROI guarantees
+
+## Success Metrics
+- **Year 1**: $750K ARR, 75 enterprise customers, 500+ active innovation blocks
+- **Year 2**: $3M ARR, 250 customers, 125% net revenue retention
+- **ROI**: Target 8:1 LTV:CAC ratio with $180-280 blended acquisition cost`,
+                    date: new Date().toLocaleDateString('en-US')
+                }
+            ];
+            saveIdeas();
+        }
+
+        function saveIdeas() {
+            localStorage.setItem('projectBlockInnovations', JSON.stringify(ideas));
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('totalIdeas').textContent = ideas.length;
+        }
+
+        function renderIdeas() {
+            const grid = document.getElementById('ideasGrid');
+            const filteredIdeas = currentFilter === 'all' 
+                ? ideas 
+                : ideas.filter(idea => idea.category === currentFilter);
+
+            if (filteredIdeas.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🔍 No projects found</h3>
+                        <p>No innovation projects in this category yet</p>
+                        <button class="cta-button" onclick="openModal()">
+                            <span>Add New Project</span>
+                            <span>→</span>
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredIdeas.map((idea, index) => `
+                <div class="idea-card">
+                    <div class="idea-header">
+                        <div>
+                            <div class="idea-title">${idea.title}</div>
+                            <div class="idea-category">${getCategoryLabel(idea.category)}</div>
+                        </div>
+                    </div>
+                    <div class="idea-description">${idea.description}</div>
+                    <div class="idea-readme">${idea.readme.split('\n').slice(0, 12).join('\n')}${idea.readme.split('\n').length > 12 ? '\n...' : ''}</div>
+                    <div class="idea-footer">
+                        <div class="idea-meta">
+                            <span>📅 ${idea.date}</span>
+                            <span>💡 Innovation Project</span>
+                        </div>
+                        <div class="idea-actions">
+                            <button class="action-btn edit-btn" onclick="editIdea(${ideas.indexOf(idea)})">✏️ Edit</button>
+                            <button class="action-btn delete-btn" onclick="deleteIdea(${ideas.indexOf(idea)})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryLabel(category) {
+            const labels = {
+                'ai': 'AI & ML',
+                'fintech': 'FinTech',
+                'healthcare': 'HealthTech',
+                'enterprise': 'Enterprise',
+                'other': 'Other'
+            };
+            return labels[category] || category.toUpperCase();
+        }
+
+        function openModal(index = -1) {
+            const modal = document.getElementById('ideaModal');
+            const form = document.getElementById('ideaForm');
+            const title = document.getElementById('modalTitle');
+            
+            if (index >= 0) {
+                editingIndex = index;
+                const idea = ideas[index];
+                document.getElementById('ideaTitle').value = idea.title;
+                document.getElementById('ideaCategory').value = idea.category;
+                document.getElementById('ideaDescription').value = idea.description;
+                document.getElementById('ideaReadme').value = idea.readme;
+                title.textContent = 'Edit Innovation Project';
+            } else {
+                editingIndex = -1;
+                form.reset();
+                title.textContent = 'Add Innovation Project';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('ideaModal').style.display = 'none';
+            editingIndex = -1;
+        }
+
+        function editIdea(index) {
+            openModal(index);
+        }
+
+        function deleteIdea(index) {
+            if (confirm('Are you sure you want to delete this innovation project?')) {
+                ideas.splice(index, 1);
+                saveIdeas();
+                renderIdeas();
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('ideaForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const idea = {
+                id: editingIndex >= 0 ? ideas[editingIndex].id : Date.now(),
+                title: document.getElementById('ideaTitle').value,
+                category: document.getElementById('ideaCategory').value,
+                description: document.getElementById('ideaDescription').value,
+                readme: document.getElementById('ideaReadme').value,
+                date: editingIndex >= 0 ? ideas[editingIndex].date : new Date().toLocaleDateString('en-US')
+            };
+
+            if (editingIndex >= 0) {
+                ideas[editingIndex] = idea;
+            } else {
+                ideas.unshift(idea);
+            }
+
+            saveIdeas();
+            renderIdeas();
+            closeModal();
+        });
+
+        // Filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderIdeas();
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('ideaModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        renderIdeas();
+        updateStats();
+    </script>
 </body>
 </html>
