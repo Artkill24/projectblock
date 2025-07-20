@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProjectBlock - Enterprise Innovation Platform</title>
     <meta name="description" content="ProjectBlock - Enterprise Innovation Platform. Build the Future, Block by Block. Modular innovation framework for Fortune 500 companies.">
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-M7WZCSW2');</script>
+    <!-- End Google Tag Manager -->
+    
     <style>
         * {
             margin: 0;
@@ -666,6 +675,11 @@
     </style>
 </head>
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M7WZCSW2"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div class="container">
         <header>
             <div class="logo">
@@ -1023,9 +1037,25 @@
         function openDemoModal() {
             document.getElementById('demoForm').style.display = 'block';
             document.getElementById('demoForm').scrollIntoView({ behavior: 'smooth' });
+            
+            // Track demo request event with GTM
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'demo_request_opened', {
+                    'event_category': 'engagement',
+                    'event_label': 'demo_form'
+                });
+            }
         }
 
         function downloadGuide() {
+            // Track guide download event with GTM
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'guide_download', {
+                    'event_category': 'engagement',
+                    'event_label': 'roi_guide'
+                });
+            }
+            
             // Simulate guide download and show thank you
             showThankYouModal();
         }
@@ -1047,6 +1077,14 @@
                 ideas.splice(index, 1);
                 saveIdeas();
                 renderIdeas();
+                
+                // Track project deletion with GTM
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'project_deleted', {
+                        'event_category': 'project_management',
+                        'event_label': 'delete_project'
+                    });
+                }
             }
         }
 
@@ -1065,8 +1103,25 @@
 
             if (editingIndex >= 0) {
                 ideas[editingIndex] = idea;
+                
+                // Track project edit with GTM
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'project_edited', {
+                        'event_category': 'project_management',
+                        'event_label': 'edit_project'
+                    });
+                }
             } else {
                 ideas.unshift(idea);
+                
+                // Track project creation with GTM
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'project_created', {
+                        'event_category': 'project_management',
+                        'event_label': 'new_project',
+                        'value': ideas.length
+                    });
+                }
             }
 
             saveIdeas();
@@ -1077,6 +1132,15 @@
         // Enterprise Demo Form
         document.getElementById('enterpriseDemoForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Track demo form submission with GTM
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'demo_form_submitted', {
+                    'event_category': 'conversion',
+                    'event_label': 'enterprise_demo',
+                    'value': 1
+                });
+            }
             
             // Simulate form submission
             document.getElementById('successMessage').style.display = 'block';
@@ -1098,6 +1162,14 @@
                 this.classList.add('active');
                 currentFilter = this.dataset.filter;
                 renderIdeas();
+                
+                // Track filter usage with GTM
+                if (typeof gtag !== 'undefined') {
+                    gtag('event', 'filter_applied', {
+                        'event_category': 'navigation',
+                        'event_label': currentFilter
+                    });
+                }
             });
         });
 
@@ -1117,6 +1189,14 @@
         // Initialize
         renderIdeas();
         updateStats();
+        
+        // Track page view with GTM
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'page_view', {
+                'page_title': 'ProjectBlock - Enterprise Innovation Platform',
+                'page_location': window.location.href
+            });
+        }
     </script>
 </body>
 </html>
