@@ -26,7 +26,7 @@ ProjectBlock is an enterprise innovation platform that uses modular "building bl
 - Security: SOC 2 Type II
 
 ## Live Demo
-Visit: [projectblock.com](https://projectblock.com)
+Visit: [project-block.com](https://projectblock.com)
 
 ## Contact
 For enterprise inquiries: hello@projectblock.com
