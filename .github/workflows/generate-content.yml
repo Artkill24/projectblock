@@ -1,0 +1,73 @@
+name: 🤖 Generate AI Content
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: 'Specific topic to write about (optional)'
+        required: false
+        default: ''
+      
+jobs:
+  generate-article:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: 📦 Install dependencies
+      run: |
+        npm init -y
+        npm install @google/generative-ai
+        
+    - name: 🧠 Generate AI article
+      run: node scripts/generate-article.js
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        CUSTOM_TOPIC: ${{ github.event.inputs.topic }}
+        
+    - name: 📊 Update blog statistics
+      run: node scripts/update-stats.js
+      
+    - name: 🔄 Commit and push changes
+      run: |
+        git config --local user.email "ai@project-block.com"
+        git config --local user.name "ProjectBlock AI"
+        git add .
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🤖 Nuovo articolo AI: $(date +'%d/%m/%Y %H:%M')" 
+          git push
+        fi
+        
+    - name: 📈 Update homepage preview
+      if: success()
+      run: node scripts/update-homepage.js
+        
+    - name: ✅ Success notification
+      if: success()
+      run: |
+        echo "✅ Nuovo articolo pubblicato con successo!"
+        echo "📊 Check: https://project-block.com/blog"
+        
+    - name: ❌ Handle failure
+      if: failure()
+      run: |
+        echo "❌ Errore nella generazione contenuti"
+        echo "🔍 Check logs per debugging"
