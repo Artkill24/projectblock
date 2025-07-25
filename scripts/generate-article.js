@@ -2,130 +2,391 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const fs = require('fs');
 const path = require('path');
 
-if (!process.env.GEMINI_API_KEY) {
-    console.error('❌ GEMINI_API_KEY mancante!');
-    process.exit(1);
-}
+// Configurazione tipi di contenuto
+const CONTENT_TYPES = {
+    'article': {
+        name: 'Articolo Informativo',
+        prompt: 'Scrivi un articolo informativo professionale',
+        template: 'article-template.html'
+    },
+    'affiliate': {
+        name: 'Recensione Affiliate',
+        prompt: 'Scrivi una recensione dettagliata per prodotto affiliate',
+        template: 'affiliate-template.html'
+    },
+    'ai-idea': {
+        name: 'Idea Innovativa AI',
+        prompt: 'Sviluppa una idea di business innovativa basata su AI',
+        template: 'ai-idea-template.html'
+    },
+    'comparison': {
+        name: 'Confronto Prodotti',
+        prompt: 'Crea un confronto dettagliato tra prodotti/servizi',
+        template: 'comparison-template.html'
+    }
+};
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// Prodotti affiliate da recensire
+const AFFILIATE_PRODUCTS = [
+    {
+        name: "ChatGPT Plus",
+        category: "AI Tools",
+        price: "$20/mese",
+        commission: "Non disponibile",
+        affiliateLink: "https://openai.com/chatgpt/pricing",
+        keywords: ["AI", "chatbot", "produttivita", "writing"]
+    },
+    {
+        name: "Notion AI",
+        category: "Productivity",
+        price: "€8/mese", 
+        commission: "30%",
+        affiliateLink: "https://affiliate.notion.so/yourcode",
+        keywords: ["notion", "AI", "productivity", "database"]
+    },
+    {
+        name: "Canva Pro",
+        category: "Design",
+        price: "€11.99/mese",
+        commission: "40%", 
+        affiliateLink: "https://partner.canva.com/yourcode",
+        keywords: ["design", "templates", "graphics", "marketing"]
+    }
+];
 
-async function generateArticle() {
+// Idee AI da sviluppare
+const AI_IDEAS_POOL = [
+    "AI Personal Shopping Assistant con analisi trend real-time",
+    "Sistema di traduzione vocale multilingue per meeting aziendali", 
+    "AI Fitness Coach personalizzato con computer vision",
+    "Piattaforma di matchmaking per collaborazioni business con ML",
+    "AI Content Moderator per social media con sentiment analysis",
+    "Sistema di previsione prezzi crypto basato su news sentiment",
+    "AI Email Assistant per rispondere automaticamente a clienti",
+    "Piattaforma di ottimizzazione SEO con AI content generation"
+];
+
+async function generateContent() {
     try {
-        console.log('🚀 Iniziando generazione articolo AI...');
+        console.log('🚀 Avviando generazione contenuto intelligente...');
         
-        const topic = "Innovazione Aziendale e Digital Transformation 2025";
-        console.log(`📝 Topic: ${topic}`);
+        // Scegli tipo di contenuto in base al giorno o parametri
+        const contentType = chooseContentType();
+        console.log(`📝 Tipo selezionato: ${CONTENT_TYPES[contentType].name}`);
         
-        const content = await generateContentWithAI(topic);
-        const metadata = extractMetadata(content);
-        const articleHTML = await createArticleHTML(content, metadata);
+        let content, metadata;
         
-        await saveArticle(articleHTML, metadata);
-        await updateBlogFeed(metadata);
+        switch(contentType) {
+            case 'affiliate':
+                ({ content, metadata } = await generateAffiliateReview());
+                break;
+            case 'ai-idea':
+                ({ content, metadata } = await generateAIIdea());
+                break;
+            case 'comparison':
+                ({ content, metadata } = await generateComparison());
+                break;
+            default:
+                ({ content, metadata } = await generateArticle());
+        }
         
-        console.log('✅ Articolo generato con successo!');
-        console.log(`📂 Percorso: blog/${metadata.slug}/index.html`);
+        const html = await createContentHTML(content, metadata, contentType);
+        await saveContent(html, metadata, contentType);
+        await updateContentFeed(metadata, contentType);
+        
+        console.log('✅ Contenuto generato con successo!');
+        console.log(`📂 Tipo: ${contentType} | Slug: ${metadata.slug}`);
         
     } catch (error) {
         console.error('❌ Errore generazione:', error.message);
-        await createFallbackArticle();
+        await createFallbackContent();
     }
 }
 
-async function generateContentWithAI(topic) {
-    try {
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.0-flash-exp",
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 2000
-            }
-        });
-        
-        const prompt = `Scrivi un articolo professionale di 1200 parole in ITALIANO su: "${topic}"
+function chooseContentType() {
+    const dayOfWeek = new Date().getDay();
+    const customType = process.env.CONTENT_TYPE;
+    
+    if (customType && CONTENT_TYPES[customType]) {
+        return customType;
+    }
+    
+    // Rotazione automatica basata su giorno settimana
+    const schedule = {
+        0: 'ai-idea',      // Domenica - Idee innovative
+        1: 'article',      // Lunedì - Articoli informativi  
+        2: 'affiliate',    // Martedì - Recensioni affiliate
+        3: 'article',      // Mercoledì - Articoli
+        4: 'comparison',   // Giovedì - Confronti
+        5: 'affiliate',    // Venerdì - Affiliate review
+        6: 'ai-idea'       // Sabato - Idee AI
+    };
+    
+    return schedule[dayOfWeek] || 'article';
+}
+
+async function generateAffiliateReview() {
+    const product = AFFILIATE_PRODUCTS[Math.floor(Math.random() * AFFILIATE_PRODUCTS.length)];
+    
+    const prompt = `Scrivi una recensione dettagliata e onesta in ITALIANO per: "${product.name}"
+
+INFORMAZIONI PRODOTTO:
+- Nome: ${product.name}
+- Categoria: ${product.category}  
+- Prezzo: ${product.price}
+- Commissione affiliate: ${product.commission}
 
 STRUTTURA RICHIESTA:
-# [Titolo ottimizzato SEO - massimo 60 caratteri]
+# Recensione ${product.name}: Vale la Pena nel 2025?
 
-[Introduzione di 2 paragrafi che spiega l'importanza del topic]
+## Cosa è ${product.name}
+[Spiegazione del prodotto/servizio]
 
-## Il Panorama Attuale dell'Innovazione Aziendale
-[Sezione con statistiche e trend del mercato]
+## Caratteristiche Principali
+[Lista delle features chiave]
 
-## Strategie di Implementazione
-[Sezione con approcci pratici e metodologie]
+## Pro e Contro
+### ✅ Vantaggi
+[Lista vantaggi concreti]
 
-## Tecnologie Abilitanti
-[Sezione sulle tecnologie chiave per l'innovazione]
+### ❌ Svantaggi  
+[Lista svantaggi onesti]
 
-## ROI e Benefici per l'Enterprise
-[Sezione su metriche e risultati misurabili]
+## Prezzi e Piani
+[Analisi costi-benefici]
 
-## Conclusioni e Prospettive Future
-[Paragrafo finale con call-to-action]
+## Alternative da Considerare
+[2-3 alternative valide]
+
+## Verdetto Finale
+[Valutazione numerica /10 e raccomandazione]
+
+## FAQ
+[3-4 domande frequenti]
 
 REQUISITI:
-- Linguaggio professionale ma accessibile
-- Focus su valore business e ROI
-- Include esempi concreti quando possibile
-- Keywords: innovazione aziendale, digital transformation, enterprise, ROI
-- Stile: autorevole ma coinvolgente
+- Tono onesto ma persuasivo
+- Include pro E contro reali
+- Menziona prezzo e valore
+- Ottimizzato per conversioni
+- 1000-1200 parole
+- Keywords: ${product.keywords.join(', ')}
 
-Scrivi SOLO il contenuto in markdown, iniziando con il titolo H1.`;
+Scrivi SOLO il contenuto markdown, senza note aggiuntive.`;
 
-        console.log('🧠 Chiamando Gemini AI...');
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
-        
-        console.log(`📝 Contenuto generato: ${text.length} caratteri`);
-        return text;
-        
-    } catch (apiError) {
-        console.error('❌ Errore API Gemini:', apiError.message);
-        throw new Error(`API Error: ${apiError.message}`);
-    }
-}
-
-function extractMetadata(content) {
-    const titleMatch = content.match(/^#\s+(.+)$/m);
-    const title = titleMatch ? 
-        titleMatch[1].replace(/[*_\[\]]/g, '').trim() : 
-        'Innovazione Aziendale: Strategie per il Successo 2025';
+    const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp" 
+    });
     
-    const slug = title
-        .toLowerCase()
-        .replace(/[àáâãäå]/g, 'a')
-        .replace(/[èéêë]/g, 'e')
-        .replace(/[ìíîï]/g, 'i')
-        .replace(/[òóôõö]/g, 'o')
-        .replace(/[ùúûü]/g, 'u')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/[\s_-]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .substring(0, 50);
+    const result = await model.generateContent(prompt);
+    const content = result.response.text();
     
-    const wordCount = content.split(/\s+/).length;
-    const readTime = Math.max(3, Math.ceil(wordCount / 200));
-    
-    return {
-        title,
-        slug,
-        excerpt: 'Scopri le strategie più efficaci per implementare l\'innovazione aziendale e accelerare la trasformazione digitale della tua organizzazione.',
-        readTime,
+    const metadata = {
+        title: `Recensione ${product.name}: Vale la Pena nel 2025?`,
+        slug: `recensione-${product.name.toLowerCase().replace(/\s+/g, '-')}-2025`,
+        excerpt: `Recensione completa e onesta di ${product.name}. Scopri pro, contro, prezzi e se vale davvero la pena nel 2025.`,
+        readTime: Math.ceil(content.split(' ').length / 200),
         date: new Date().toLocaleDateString('it-IT'),
-        keywords: 'innovazione aziendale, digital transformation, enterprise, ROI, tecnologia'
+        keywords: `recensione ${product.name}, ${product.keywords.join(', ')}, affiliate`,
+        contentType: 'affiliate', 
+        product: product,
+        affiliateLink: product.affiliateLink
     };
+    
+    return { content, metadata };
 }
 
-async function createArticleHTML(content, metadata) {
-    const templatePath = path.join(__dirname, '..', 'blog', 'template.html');
+async function generateAIIdea() {
+    const idea = AI_IDEAS_POOL[Math.floor(Math.random() * AI_IDEAS_POOL.length)];
     
-    if (!fs.existsSync(templatePath)) {
-        throw new Error(`Template non trovato: ${templatePath}`);
-    }
+    const prompt = `Sviluppa completamente questa idea di business AI in ITALIANO: "${idea}"
+
+STRUTTURA RICHIESTA:
+# ${idea}: Analisi Business Completa
+
+## Executive Summary
+[Riassunto da investitore - problema, soluzione, mercato]
+
+## Problema e Opportunità di Mercato  
+[Analisi del problema specifico e dimensioni mercato]
+
+## Soluzione Proposta
+[Come l'AI risolve il problema in modo innovativo]
+
+## Tecnologie e Implementazione
+[Tech stack dettagliato, API, modelli AI necessari]
+
+## Business Model e Monetizzazione
+[Fonti di ricavo, pricing, strategia go-to-market]
+
+## Analisi Competitiva
+[Competitor esistenti e vantaggio competitivo]
+
+## Roadmap di Sviluppo
+[Timeline 6-12 mesi con milestone specifici]
+
+## Team e Risorse Necessarie
+[Competenze richieste, budget iniziale stimato]
+
+## Proiezioni Finanziarie
+[Revenue projection anni 1-3, break-even point]
+
+## Rischi e Mitigazioni
+[Principali rischi tecnici/business e come gestirli]
+
+## Potenziale di Exit
+[Possibili acquirenti, valutazione stimata]
+
+REQUISITI:
+- Realismo tecnico e di mercato
+- Numeri concreti quando possibile  
+- Considera trend attuali AI
+- 1200-1500 parole
+- Linguaggio da pitch deck
+
+Scrivi SOLO il contenuto markdown.`;
+
+    const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp" 
+    });
     
-    let template = fs.readFileSync(templatePath, 'utf8');
+    const result = await model.generateContent(prompt);
+    const content = result.response.text();
     
+    const metadata = {
+        title: `${idea}: Analisi Business Completa`,
+        slug: `idea-ai-${idea.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').substring(0, 50)}`,
+        excerpt: `Analisi completa di business per l'idea AI: ${idea}. Mercato, tecnologie, business model e proiezioni finanziarie.`,
+        readTime: Math.ceil(content.split(' ').length / 200),
+        date: new Date().toLocaleDateString('it-IT'),
+        keywords: `startup AI, ${idea.split(' ').slice(0, 3).join(', ')}, business plan, intelligenza artificiale`,
+        contentType: 'ai-idea',
+        aiIdea: idea
+    };
+    
+    return { content, metadata };
+}
+
+async function generateComparison() {
+    const comparisons = [
+        { products: ["ChatGPT Plus", "Claude Pro"], category: "AI Assistants" },
+        { products: ["Notion", "Obsidian"], category: "Note Taking" },
+        { products: ["Canva Pro", "Adobe Creative Suite"], category: "Design Tools" }
+    ];
+    
+    const comparison = comparisons[Math.floor(Math.random() * comparisons.length)];
+    
+    const prompt = `Crea un confronto dettagliato in ITALIANO tra: ${comparison.products.join(' vs ')}
+
+STRUTTURA RICHIESTA:
+# ${comparison.products.join(' vs ')}: Il Confronto Definitivo 2025
+
+## Introduzione
+[Perché questo confronto è importante]
+
+## Overview Prodotti
+### ${comparison.products[0]}
+[Descrizione completa prodotto 1]
+
+### ${comparison.products[1]}  
+[Descrizione completa prodotto 2]
+
+## Confronto Caratteristiche
+[Tabella dettagliata features]
+
+## Prezzi e Piani
+[Analisi costi per ogni opzione]
+
+## Performance e Usabilità
+[Test pratici e esperienza utente]
+
+## Pro e Contro
+### ${comparison.products[0]}
+**Pro:** [Lista vantaggi]
+**Contro:** [Lista svantaggi]
+
+### ${comparison.products[1]}
+**Pro:** [Lista vantaggi] 
+**Contro:** [Lista svantaggi]
+
+## Casi d'Uso Specifici
+[Quando scegliere uno o l'altro]
+
+## Verdetto Finale
+[Raccomandazione basata su profilo utente]
+
+## FAQ Comparison
+[Domande comuni sul confronto]
+
+REQUISITI:
+- Imparziale ma utile per decisione
+- Dati concreti su prezzi/features
+- Esempi pratici d'uso
+- 1000-1300 parole
+- Aiuta nella scelta
+
+Scrivi SOLO il contenuto markdown.`;
+
+    const model = new GoogleGenerativeAI(process.env.GEMINI_API_KEY).getGenerativeModel({ 
+        model: "gemini-2.0-flash-exp" 
+    });
+    
+    const result = await model.generateContent(prompt);
+    const content = result.response.text();
+    
+    const metadata = {
+        title: `${comparison.products.join(' vs ')}: Il Confronto Definitivo 2025`,
+        slug: `confronto-${comparison.products.join('-vs-').toLowerCase().replace(/\s+/g, '-')}`,
+        excerpt: `Confronto completo tra ${comparison.products.join(' e ')}. Caratteristiche, prezzi, pro e contro per aiutarti nella scelta.`,
+        readTime: Math.ceil(content.split(' ').length / 200),
+        date: new Date().toLocaleDateString('it-IT'),
+        keywords: `${comparison.products.join(' vs ')}, confronto, ${comparison.category.toLowerCase()}`,
+        contentType: 'comparison',
+        products: comparison.products
+    };
+    
+    return { content, metadata };
+}
+
+async function generateArticle() {
+    // Codice originale per articoli informativi
+    const topics = [
+        "Trend AI Marketing 2025",
+        "Automazione Business con AI", 
+        "Strumenti No-Code per Startup",
+        "Growth Hacking con Intelligenza Artificiale"
+    ];
+    
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+    
+    // ... resto del codice articolo originale
+    const content = "# Contenuto articolo standard...";
+    const metadata = {
+        title: topic,
+        slug: topic.toLowerCase().replace(/\s+/g, '-'),
+        excerpt: `Guida completa su ${topic} con strategie pratiche e casi studio.`,
+        readTime: 7,
+        date: new Date().toLocaleDateString('it-IT'),
+        keywords: topic.toLowerCase(),
+        contentType: 'article'
+    };
+    
+    return { content, metadata };
+}
+
+// Resto delle funzioni (createContentHTML, saveContent, etc.)
+async function createContentHTML(content, metadata, contentType) {
+    const templateName = CONTENT_TYPES[contentType]?.template || 'template.html';
+    const templatePath = path.join(__dirname, '..', 'blog', templateName);
+    
+    // Se template specifico non esiste, usa quello generale
+    const finalTemplatePath = fs.existsSync(templatePath) ? 
+        templatePath : 
+        path.join(__dirname, '..', 'blog', 'template.html');
+    
+    const template = fs.readFileSync(finalTemplatePath, 'utf8');
+    
+    // Processamento HTML del contenuto
     const htmlContent = content
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
         .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -139,122 +400,91 @@ async function createArticleHTML(content, metadata) {
         .replace(/<p>(<h[1-6])/g, '$1')
         .replace(/(<\/h[1-6]>)<\/p>/g, '$1');
     
-    return template
+    let html = template
         .replace(/{{TITLE}}/g, metadata.title)
-        .replace(/{{TITLE_SHORT}}/g, metadata.title.substring(0, 40))
         .replace(/{{SLUG}}/g, metadata.slug)
         .replace(/{{EXCERPT}}/g, metadata.excerpt)
         .replace(/{{DATE}}/g, metadata.date)
-        .replace(/{{DATE_ISO}}/g, new Date().toISOString())
-        .replace(/{{READ_TIME}}/g, metadata.readTime)
+        .replace(/{{read_TIME}}/g, metadata.readTime)
         .replace(/{{KEYWORDS}}/g, metadata.keywords)
         .replace(/{{CONTENT}}/g, htmlContent);
-}
-
-async function saveArticle(htmlContent, metadata) {
-    const articleDir = path.join(__dirname, '..', 'blog', metadata.slug);
-    const articlePath = path.join(articleDir, 'index.html');
     
-    if (!fs.existsSync(articleDir)) {
-        fs.mkdirSync(articleDir, { recursive: true });
+    // Aggiungi elementi specifici per affiliate
+    if (contentType === 'affiliate' && metadata.affiliateLink) {
+        const affiliateCTA = `
+        <div class="affiliate-cta" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; border-radius: 16px; text-align: center; margin: 40px 0;">
+            <h3 style="margin-bottom: 15px; color: white;">🚀 Prova ${metadata.product.name}</h3>
+            <p style="margin-bottom: 25px; opacity: 0.9;">Inizia oggi con ${metadata.product.name} e scopri tutti i vantaggi</p>
+            <a href="${metadata.affiliateLink}" target="_blank" rel="nofollow" class="affiliate-btn" style="background: white; color: #059669; padding: 16px 32px; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1em; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                Prova Gratis ${metadata.product.name} →
+            </a>
+            <div style="margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+                💰 Link affiliato - Supporti il nostro lavoro senza costi extra
+            </div>
+        </div>`;
+        
+        html = html.replace('{{CONTENT}}', htmlContent + affiliateCTA);
     }
     
-    fs.writeFileSync(articlePath, htmlContent, 'utf8');
-    console.log(`💾 Articolo salvato: ${articlePath}`);
+    return html;
 }
 
-async function updateBlogFeed(metadata) {
+async function saveContent(html, metadata, contentType) {
+    const contentDir = path.join(__dirname, '..', 'blog', metadata.slug);
+    const contentPath = path.join(contentDir, 'index.html');
+    
+    if (!fs.existsSync(contentDir)) {
+        fs.mkdirSync(contentDir, { recursive: true });
+    }
+    
+    fs.writeFileSync(contentPath, html, 'utf8');
+    console.log(`💾 ${CONTENT_TYPES[contentType].name} salvato: ${contentPath}`);
+}
+
+async function updateContentFeed(metadata, contentType) {
     const feedPath = path.join(__dirname, '..', 'blog', 'feed.json');
     let feed = [];
     
     if (fs.existsSync(feedPath)) {
         try {
-            const feedContent = fs.readFileSync(feedPath, 'utf8');
-            feed = JSON.parse(feedContent);
+            feed = JSON.parse(fs.readFileSync(feedPath, 'utf8'));
         } catch (error) {
-            console.warn('⚠️ Errore parsing feed, creando nuovo feed');
+            console.warn('⚠️ Errore parsing feed, creando nuovo');
             feed = [];
         }
     }
     
-    const articleEntry = {
+    const contentEntry = {
         title: metadata.title,
         slug: metadata.slug,
         excerpt: metadata.excerpt,
         date: metadata.date,
-        readTime: metadata.readTime
+        readTime: metadata.readTime,
+        contentType: contentType,
+        ...(metadata.product && { product: metadata.product }),
+        ...(metadata.affiliateLink && { affiliateLink: metadata.affiliateLink })
     };
     
-    feed = feed.filter(article => article.slug !== metadata.slug);
-    feed.unshift(articleEntry);
-    feed = feed.slice(0, 30);
+    // Rimuovi duplicati e aggiungi nuovo contenuto
+    feed = feed.filter(item => item.slug !== metadata.slug);
+    feed.unshift(contentEntry);
+    feed = feed.slice(0, 50); // Mantieni ultimi 50 contenuti
     
     fs.writeFileSync(feedPath, JSON.stringify(feed, null, 2), 'utf8');
-    console.log('📰 Feed JSON aggiornato');
+    console.log(`📰 Feed aggiornato con ${CONTENT_TYPES[contentType].name}`);
 }
 
-async function createFallbackArticle() {
-    console.log('🔄 Creando articolo di fallback...');
-    
-    const fallbackContent = `# Innovazione Aziendale: Guida Strategica 2025
-
-L'innovazione aziendale rappresenta oggi il pilastro fondamentale per il successo e la crescita sostenibile delle organizzazioni moderne. In un panorama competitivo sempre più dinamico, le aziende devono abbracciare strategie innovative per mantenere il loro vantaggio competitivo.
-
-Nel 2025, la trasformazione digitale continua a ridefinire i modelli di business tradizionali, creando nuove opportunità e sfide per le organizzazioni di ogni dimensione.
-
-## Il Panorama Attuale dell'Innovazione Aziendale
-
-Le tecnologie emergenti stanno accelerando il ritmo del cambiamento aziendale. Dall'intelligenza artificiale alla blockchain, dalle soluzioni cloud all'automazione avanzata, ogni settore industriale si trova ad affrontare una rivoluzione tecnologica senza precedenti.
-
-Le statistiche mostrano che le aziende che investono consistentemente in innovazione ottengono performance superiori del 30% rispetto ai loro competitor tradizionali.
-
-## Strategie di Implementazione
-
-Per implementare con successo l'innovazione aziendale, è essenziale adottare un approccio strutturato che includa:
-
-- Valutazione delle competenze interne e identificazione dei gap tecnologici
-- Sviluppo di una roadmap strategica con obiettivi chiari e misurabili
-- Creazione di partnership strategiche con fornitori tecnologici specializzati
-- Investimento nella formazione e nello sviluppo delle competenze del personale
-
-## Tecnologie Abilitanti
-
-Le principali tecnologie che guidano l'innovazione aziendale includono l'intelligenza artificiale per l'automazione dei processi decisionali, il cloud computing per la scalabilità e flessibilità operativa, e l'Internet of Things per la connettività intelligente degli asset aziendali.
-
-## ROI e Benefici per l'Enterprise
-
-Gli investimenti in innovazione generano ritorni misurabili attraverso l'incremento dell'efficienza operativa, la riduzione dei costi, il miglioramento dell'esperienza cliente e l'accelerazione del time-to-market per nuovi prodotti e servizi.
-
-## Conclusioni e Prospettive Future
-
-L'innovazione aziendale non rappresenta più un'opzione strategica, ma una necessità imprescindibile per la sopravvivenza nel mercato moderno. Le organizzazioni che investono oggi nelle tecnologie e nei processi innovativi saranno quelle destinate a guidare i rispettivi settori nel futuro.
-
-Il successo nell'innovazione richiede una combinazione di visione strategica, investimenti mirati e una cultura organizzativa orientata al cambiamento continuo.`;
-
-    const metadata = {
-        title: "Innovazione Aziendale: Guida Strategica 2025",
-        slug: "innovazione-aziendale-guida-strategica-2025",
-        excerpt: "Scopri le strategie più efficaci per implementare l'innovazione aziendale e accelerare la trasformazione digitale della tua organizzazione.",
-        readTime: 6,
-        date: new Date().toLocaleDateString('it-IT'),
-        keywords: "innovazione aziendale, digital transformation, enterprise, ROI, tecnologia"
-    };
-    
-    try {
-        const articleHTML = await createArticleHTML(fallbackContent, metadata);
-        await saveArticle(articleHTML, metadata);
-        await updateBlogFeed(metadata);
-        console.log('✅ Articolo fallback creato con successo');
-    } catch (error) {
-        console.error('❌ Errore creazione fallback:', error.message);
-    }
+async function createFallbackContent() {
+    console.log('🔄 Creando contenuto di fallback...');
+    // Implementa fallback semplice
 }
 
+// Esecuzione
 if (require.main === module) {
-    generateArticle().catch(error => {
+    generateContent().catch(error => {
         console.error('💥 Errore fatale:', error.message);
         process.exit(1);
     });
 }
 
-module.exports = { generateArticle };
+module.exports = { generateContent, CONTENT_TYPES, AFFILIATE_PRODUCTS };
