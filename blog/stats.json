@@ -1,16 +1,16 @@
 {
-  "totalArticles": 1,
-  "totalReadTime": 7,
-  "thisMonthArticles": 1,
-  "averageReadTime": 7,
+  "totalArticles": 2,
+  "totalReadTime": 15,
+  "thisMonthArticles": 2,
+  "averageReadTime": 8,
   "topKeywords": [],
   "categories": {
-    "ai": 0,
+    "ai": 1,
     "blockchain": 0,
-    "business": 0,
+    "business": 1,
     "innovation": 1
   },
-  "lastUpdated": "2025-07-25T08:18:29.765Z",
+  "lastUpdated": "2025-07-26T08:16:34.133Z",
   "contentQualityScore": 70,
   "publishingConsistency": 0
 }
