@@ -304,6 +304,202 @@
             }
         }
     </style>
+
+<!-- 🎯 PROJECTBLOCK REVENUE TRACKING SYSTEM -->
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GT-MRM7BGZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GT-MRM7BGZ', {
+    // Enhanced E-commerce per tracking revenue
+    custom_map: {
+      'custom_parameter_1': 'affiliate_product',
+      'custom_parameter_2': 'commission_value'
+    }
+  });
+
+  // 💰 AFFILIATE CLICK TRACKING AVANZATO
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 ProjectBlock Analytics Loading...');
+    
+    // Track all affiliate links
+    document.querySelectorAll('a[href*="semrush"], a[href*="systeme.io"], a[href*="jasper"], a[href*="convertkit"], a[data-affiliate="true"]').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const productName = this.dataset.product || extractProductFromUrl(this.href);
+        const commissionValue = this.dataset.commission || getCommissionByProduct(productName);
+        
+        // Track affiliate click
+        gtag('event', 'affiliate_click', {
+          'product_name': productName,
+          'commission_potential': commissionValue,
+          'link_url': this.href,
+          'page_title': document.title,
+          'page_location': window.location.href,
+          'click_text': this.textContent.trim()
+        });
+        
+        // Enhanced E-commerce event
+        gtag('event', 'select_promotion', {
+          'creative_name': productName + '_affiliate',
+          'creative_slot': 'affiliate_link',
+          'promotion_id': productName.toLowerCase(),
+          'promotion_name': productName + ' Affiliate'
+        });
+        
+        console.log('💰 Affiliate click tracked:', productName, commissionValue);
+        
+        // Visual feedback
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => this.style.transform = 'scale(1)', 150);
+      });
+    });
+    
+    // 📧 EMAIL CAPTURE TRACKING
+    const emailForm = document.getElementById('emailCaptureForm');
+    if (emailForm) {
+      emailForm.addEventListener('submit', function(e) {
+        const email = document.getElementById('emailInput').value;
+        
+        gtag('event', 'email_capture', {
+          'method': 'popup',
+          'page_title': document.title,
+          'page_location': window.location.href,
+          'value': 5.00, // Estimated lifetime value
+          'currency': 'EUR'
+        });
+        
+        gtag('event', 'generate_lead', {
+          'currency': 'EUR',
+          'value': 5.00
+        });
+        
+        console.log('📧 Email capture tracked:', email);
+      });
+    }
+    
+    // 👁️ CONTENT ENGAGEMENT TRACKING
+    let readTime = 0;
+    const startTime = Date.now();
+    
+    // Track reading time every 30 seconds
+    setInterval(() => {
+      readTime += 30;
+      if (readTime % 60 === 0) { // Every minute
+        gtag('event', 'page_view_time', {
+          'time_spent': readTime,
+          'content_type': getContentType(),
+          'page_title': document.title
+        });
+      }
+    }, 30000);
+    
+    // Track scroll depth
+    let maxScroll = 0;
+    window.addEventListener('scroll', throttle(() => {
+      const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+      
+      if (scrollPercent > maxScroll && scrollPercent % 25 === 0) {
+        maxScroll = scrollPercent;
+        gtag('event', 'scroll', {
+          'percent_scrolled': scrollPercent,
+          'page_title': document.title
+        });
+      }
+    }, 1000));
+    
+    // 🎯 CTA BUTTON TRACKING
+    document.querySelectorAll('.cta-btn, .primary-btn, .affiliate-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        gtag('event', 'cta_click', {
+          'cta_text': this.textContent.trim(),
+          'cta_position': getCTAPosition(this),
+          'page_title': document.title
+        });
+      });
+    });
+    
+    console.log('✅ ProjectBlock Analytics Ready!');
+  });
+  
+  // 🔧 UTILITY FUNCTIONS
+  function extractProductFromUrl(url) {
+    if (url.includes('semrush')) return 'SEMrush';
+    if (url.includes('systeme.io')) return 'Systeme.io';
+    if (url.includes('jasper')) return 'Jasper AI';
+    if (url.includes('convertkit')) return 'ConvertKit';
+    if (url.includes('canva')) return 'Canva Pro';
+    if (url.includes('clickup')) return 'ClickUp';
+    return 'Unknown Product';
+  }
+  
+  function getCommissionByProduct(product) {
+    const commissions = {
+      'SEMrush': 40.00,
+      'Systeme.io': 58.00,
+      'Jasper AI': 14.70,
+      'ConvertKit': 7.50,
+      'Canva Pro': 4.80,
+      'ClickUp': 3.00
+    };
+    return commissions[product] || 0;
+  }
+  
+  function getContentType() {
+    if (window.location.href.includes('/blog/')) {
+      if (document.querySelector('[data-content-type]')) {
+        return document.querySelector('[data-content-type]').dataset.contentType;
+      }
+      return 'blog_article';
+    }
+    return 'homepage';
+  }
+  
+  function getCTAPosition(element) {
+    const rect = element.getBoundingClientRect();
+    const scrollPercent = Math.round((window.scrollY + rect.top) / document.body.scrollHeight * 100);
+    return `${scrollPercent}%_from_top`;
+  }
+  
+  function throttle(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+</script>
+
+<!-- 🔥 HOTJAR HEATMAP TRACKING -->
+<script>
+  (function(h,o,t,j,a,r){
+    h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+    h._hjSettings={hjid:3574829,hjsv:6}; // Free Hotjar ID - sostituisci con il tuo
+    a=o.getElementsByTagName('head')[0];
+    r=o.createElement('script');r.async=1;
+    r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+    a.appendChild(r);
+  })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+</script>
+
+<!-- 📱 FACEBOOK PIXEL (opzionale per retargeting) -->
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', 'TUO_PIXEL_ID_QUI'); // Sostituisci con il tuo Pixel ID
+  fbq('track', 'PageView');
+</script>
 </head>
 <body>
     <div class="article-container">
