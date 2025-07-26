@@ -1,15 +1,37 @@
 {
-  "name": "projectblock",
-  "version": "1.0.0",
-  "description": "🚀 Build the Future, Block by Block",
+  "name": "projectblock-revenue",
+  "version": "2.0.0",
+  "description": "🚀 Enterprise Innovation Platform with Revenue Boost",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "node scripts/quick-setup.js",
+    "test": "node scripts/test-everything.js",
+    "test:analytics": "node scripts/test-analytics.js",
+    "test:convertkit": "node scripts/test-convertkit.js",
+    "generate": "node scripts/generate-article.js",
+    "generate:affiliate": "CONTENT_TYPE=affiliate node scripts/generate-article.js",
+    "generate:ai-idea": "CONTENT_TYPE=ai-idea node scripts/generate-article.js",
+    "revenue:calculate": "node config/affiliate-products.js",
+    "revenue:dashboard": "node scripts/implement-analytics.js && open analytics-dashboard.html",
+    "convertkit:setup": "node scripts/integrate-convertkit.js",
+    "start": "python3 -m http.server 8000",
+    "start:test": "node scripts/test-everything.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.24.1"
-  }
+  },
+  "devDependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "keywords": [
+    "ai",
+    "revenue",
+    "affiliate",
+    "convertkit", 
+    "analytics",
+    "automation",
+    "monetization"
+  ],
+  "author": "ProjectBlock Team",
+  "license": "MIT"
 }
