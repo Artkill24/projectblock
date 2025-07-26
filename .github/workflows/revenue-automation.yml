@@ -1,0 +1,74 @@
+name: 🚀 Revenue Content Automation
+
+on:
+  schedule:
+    - cron: '0 8 * * *'    # Daily at 8 AM
+    - cron: '0 12 * * 1'   # Monday affiliate focus
+    - cron: '0 15 * * 3'   # Wednesday comparisons  
+    - cron: '0 10 * * 5'   # Friday revenue reports
+  workflow_dispatch:
+    inputs:
+      content_type:
+        description: 'Content type'
+        required: false
+        default: 'affiliate'
+      focus_product:
+        description: 'Product focus'
+        required: false
+        default: 'SEMrush'
+
+jobs:
+  generate-revenue-content:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+      
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: 📦 Install dependencies
+      run: npm install
+        
+    - name: 🎯 Generate revenue content
+      run: npm run generate
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        CONTENT_TYPE: ${{ github.event.inputs.content_type }}
+        FOCUS_PRODUCT: ${{ github.event.inputs.focus_product }}
+        
+    - name: 📧 Update integrations
+      run: |
+        npm run convertkit:setup
+        npm run revenue:calculate
+        
+    - name: 🧪 Run tests
+      run: npm run test
+        
+    - name: 🔄 Commit changes
+      run: |
+        git config --local user.email "revenue-bot@project-block.com"
+        git config --local user.name "ProjectBlock Revenue Bot"
+        git add .
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "🚀 Revenue content: $(date +'%d/%m/%Y') - ${{ github.event.inputs.content_type }}"
+          git push
+        fi
+        
+    - name: 📊 Success notification
+      if: success()
+      run: |
+        echo "✅ Revenue automation completed!"
+        echo "🌐 Check: https://project-block.com"
